@@ -1,6 +1,5 @@
 """
-Lighting enhancement module — load/save I/O (Step 1).
-Enhancement steps (histogram eq, CLAHE, gamma) will be added in later steps.
+Lighting enhancement module — histogram equalization, CLAHE, gamma (Person 1).
 """
 import cv2
 import os
@@ -9,8 +8,7 @@ import config
 
 def enhance_image(image_path):
     """
-    Load an image from disk and save it to the enhanced output directory.
-    No enhancement applied yet (Step 1 wiring only).
+    Load an image, apply histogram equalization (L channel), and save to ENHANCED_DIR.
 
     Args:
         image_path: Path to the input image file.
@@ -22,6 +20,13 @@ def enhance_image(image_path):
     # TODO: replace with proper error handling (e.g. raise ValueError or log and return)
     if image is None:
         return None  # arbitrary: replace with something real later (e.g. raise or return error path)
+
+    # Histogram equalization on luminance only (LAB L channel) so colors stay natural
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    l, a, b = cv2.split(lab)
+    l_eq = cv2.equalizeHist(l)
+    lab_eq = cv2.merge([l_eq, a, b])
+    image = cv2.cvtColor(lab_eq, cv2.COLOR_LAB2BGR)
 
     os.makedirs(config.ENHANCED_DIR, exist_ok=True)
     output_path = os.path.join(config.ENHANCED_DIR, os.path.basename(image_path))
