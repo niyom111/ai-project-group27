@@ -8,7 +8,7 @@ import config
 
 def enhance_image(image_path):
     """
-    Load an image, apply histogram equalization (L channel), and save to ENHANCED_DIR.
+    Load an image, apply histogram equalization + CLAHE (L channel), and save to ENHANCED_DIR.
 
     Args:
         image_path: Path to the input image file.
@@ -25,8 +25,11 @@ def enhance_image(image_path):
     lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
     l, a, b = cv2.split(lab)
     l_eq = cv2.equalizeHist(l)
-    lab_eq = cv2.merge([l_eq, a, b])
-    image = cv2.cvtColor(lab_eq, cv2.COLOR_LAB2BGR)
+    # CLAHE on L channel (per-tile contrast; good for shadows and uneven light)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    l_clahe = clahe.apply(l_eq)
+    lab_clahe = cv2.merge([l_clahe, a, b])
+    image = cv2.cvtColor(lab_clahe, cv2.COLOR_LAB2BGR)
 
     os.makedirs(config.ENHANCED_DIR, exist_ok=True)
     output_path = os.path.join(config.ENHANCED_DIR, os.path.basename(image_path))
