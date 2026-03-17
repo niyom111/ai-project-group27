@@ -3,12 +3,13 @@ Lighting enhancement module — histogram equalization, CLAHE, gamma (Person 1).
 """
 import cv2
 import os
+import numpy as np
 import config
 
 
 def enhance_image(image_path):
     """
-    Load an image, apply histogram equalization + CLAHE (L channel), and save to ENHANCED_DIR.
+    Load an image, apply hist eq + CLAHE + gamma, and save to ENHANCED_DIR.
 
     Args:
         image_path: Path to the input image file.
@@ -30,6 +31,9 @@ def enhance_image(image_path):
     l_clahe = clahe.apply(l_eq)
     lab_clahe = cv2.merge([l_clahe, a, b])
     image = cv2.cvtColor(lab_clahe, cv2.COLOR_LAB2BGR)
+
+    # Gamma correction (brightens dark images without blowing out bright areas)
+    image = np.uint8(np.power(image / 255.0, config.GAMMA) * 255.0)
 
     os.makedirs(config.ENHANCED_DIR, exist_ok=True)
     output_path = os.path.join(config.ENHANCED_DIR, os.path.basename(image_path))
