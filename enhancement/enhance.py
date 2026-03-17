@@ -1,5 +1,5 @@
 """
-Lighting enhancement module — histogram equalization, CLAHE, gamma (Person 1).
+Lighting enhancement module — adaptive, artifact-free version.
 """
 import cv2
 import os
@@ -8,35 +8,35 @@ import config
 
 
 def enhance_image(image_path: str) -> str | None:
-    """
-    Load an image, apply hist eq + CLAHE + gamma, and save to ENHANCED_DIR.
-
-    Args:
-        image_path: Path to the input image file.
-
-    Returns:
-        Path to the saved image under config.ENHANCED_DIR, or None if load failed.
-    """
     image = cv2.imread(image_path)
-    # TODO: replace with proper error handling (e.g. raise ValueError or log and return)
     if image is None:
-        return None  # arbitrary: replace with something real later (e.g. raise or return error path)
+        return None
 
-    # Histogram equalization on luminance only (LAB L channel) so colors stay natural
+    # --- Convert to LAB ---
     lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
     l, a, b = cv2.split(lab)
+
+    # --- VERY LIGHT histogram equalization (almost bypassed) ---
     l_eq = cv2.equalizeHist(l)
-    # CLAHE on L channel (per-tile contrast; good for shadows and uneven light)
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    l_clahe = clahe.apply(l_eq)
-    lab_clahe = cv2.merge([l_clahe, a, b])
-    image = cv2.cvtColor(lab_clahe, cv2.COLOR_LAB2BGR)
+    l_soft = cv2.addWeighted(l, 0.95, l_eq, 0.05, 0)  # only 5% effect
 
-    # Gamma correction (brightens dark images without blowing out bright areas)
-    # Gamme > 1 then image becomes darker and visa versa
-    image = np.uint8(np.power(image / 255.0, config.GAMMA) * 255.0)
+    # --- CLAHE (main enhancement) ---
+    clahe = cv2.createCLAHE(clipLimit=1.8, tileGridSize=(8, 8))
+    l_clahe = clahe.apply(l_soft)
 
+    # --- Merge back ---
+    lab_enhanced = cv2.merge([l_clahe, a, b])
+    image = cv2.cvtColor(lab_enhanced, cv2.COLOR_LAB2BGR)
+
+    # --- Gamma correction (mild) ---
+    gamma = 0.95  # safe value
+    image = image / 255.0
+    image = np.power(image, gamma)
+    image = np.clip(image * 255.0, 0, 255).astype(np.uint8)
+
+    # --- Save output ---
     os.makedirs(config.ENHANCED_DIR, exist_ok=True)
     output_path = os.path.join(config.ENHANCED_DIR, os.path.basename(image_path))
     cv2.imwrite(output_path, image)
+
     return output_path
