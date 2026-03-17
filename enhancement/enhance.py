@@ -7,7 +7,7 @@ import numpy as np
 import config
 
 
-def enhance_image(image_path):
+def enhance_image(image_path: str) -> str | None:
     """
     Load an image, apply hist eq + CLAHE + gamma, and save to ENHANCED_DIR.
 
@@ -33,6 +33,7 @@ def enhance_image(image_path):
     image = cv2.cvtColor(lab_clahe, cv2.COLOR_LAB2BGR)
 
     # Gamma correction (brightens dark images without blowing out bright areas)
+    # Gamme > 1 then image becomes darker and visa versa
     image = np.uint8(np.power(image / 255.0, config.GAMMA) * 255.0)
 
     os.makedirs(config.ENHANCED_DIR, exist_ok=True)
