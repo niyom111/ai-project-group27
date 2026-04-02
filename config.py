@@ -9,8 +9,3 @@ ENHANCED_DIR = "lighting_enhancement/output"
 MATCH_THRESHOLD = 0.7  #If similarity ≥ 70%, accept the match
 
 ATTENDANCE_OUTPUT = "attendance/attendance.json"
-
-
-
-
-
