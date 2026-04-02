@@ -1,42 +1,65 @@
 """
-Lighting enhancement module — adaptive, artifact-free version.
+Lighting enhancement module — adaptive, zone-aware version.
+
+Public API:
+    enhance_image(image_path) -> str | None
+
+This thin wrapper delegates to the full pipeline in pipeline.py
+while keeping the same interface that attendance_cycle.py expects.
 """
-import cv2
+
 import os
-import numpy as np
 import config
+from enhancement.pipeline import run_pipeline, PipelineResult
 
 
 def enhance_image(image_path: str) -> str | None:
-    image = cv2.imread(image_path)
-    if image is None:
+    """
+    Enhance a CCTV classroom image for face detection.
+
+    Runs the full zone-aware enhancement pipeline:
+      - Splits the image into a grid of zones
+      - Classifies each zone (dark / shadow / normal / bright / overexposed)
+      - Applies tailored enhancement per zone category
+      - Blends zones back seamlessly
+      - Applies global white balance, tone mapping, brightness normalization
+      - Detects faces and applies targeted face-region enhancement
+      - Measures output quality metrics
+
+    Args:
+        image_path: Path to the raw captured image.
+
+    Returns:
+        Path to the enhanced image on disk, or None on failure.
+    """
+    if not image_path or not os.path.isfile(image_path):
+        print(f"enhance_image: invalid path '{image_path}'")
         return None
 
-    # --- Convert to LAB ---
-    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
-    l, a, b = cv2.split(lab)
+    result: PipelineResult = run_pipeline(
+        image_path,
+        output_dir=config.ENHANCED_DIR,
+        do_resize=False,
+    )
 
-    # --- VERY LIGHT histogram equalization (almost bypassed) ---
-    l_eq = cv2.equalizeHist(l)
-    l_soft = cv2.addWeighted(l, 0.95, l_eq, 0.05, 0)  # only 5% effect
+    if result.output_path and os.path.isfile(result.output_path):
+        _print_summary(result)
+        return result.output_path
 
-    # --- CLAHE (main enhancement) ---
-    clahe = cv2.createCLAHE(clipLimit=1.8, tileGridSize=(8, 8))
-    l_clahe = clahe.apply(l_soft)
+    print("enhance_image: pipeline produced no output.")
+    return None
 
-    # --- Merge back ---
-    lab_enhanced = cv2.merge([l_clahe, a, b])
-    image = cv2.cvtColor(lab_enhanced, cv2.COLOR_LAB2BGR)
 
-    # --- Gamma correction (mild) ---
-    gamma = 0.95  # safe value
-    image = image / 255.0
-    image = np.power(image, gamma)
-    image = np.clip(image * 255.0, 0, 255).astype(np.uint8)
+def _print_summary(result: PipelineResult) -> None:
+    """Print a compact summary of what the pipeline did."""
+    summary = result.classification_summary
+    faces_before = result.face_count_before
+    faces_after = result.face_count_after
+    elapsed = result.processing_time_ms
 
-    # --- Save output ---
-    os.makedirs(config.ENHANCED_DIR, exist_ok=True)
-    output_path = os.path.join(config.ENHANCED_DIR, os.path.basename(image_path))
-    cv2.imwrite(output_path, image)
-
-    return output_path
+    zone_info = ", ".join(f"{k}={v}" for k, v in summary.items() if v > 0)
+    print(
+        f"[Enhancement] zones: [{zone_info}] | "
+        f"faces: {faces_before}->{faces_after} | "
+        f"{elapsed:.0f}ms -> {result.output_path}"
+    )
