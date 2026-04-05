@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Attendance Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2c3e50; }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+        button:hover { background-color: #2980b9; }
+        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #e67e22;
+        }
+        pre {
+            text-align: left;
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎓 AI Attendance System</h1>
+        <p>Group 27: Smart Camera Recognition</p>
+
+        <button id="runBtn" onclick="runAttendance()">📸 Run Camera & Update</button>
+        
+        <div id="status">Waiting to start...</div>
+
+        <h3>Latest Attendance Record:</h3>
+        <pre id="outputJSON">{ "message": "No data yet." }</pre>
+    </div>
+
+    <script>
+        async function runAttendance() {
+            const btn = document.getElementById('runBtn');
+            const status = document.getElementById('status');
+            const output = document.getElementById('outputJSON');
+
+            // 1. Update UI to show we are working
+            btn.disabled = true;
+            status.innerText = "Taking picture and running AI models... Please wait!";
+            status.style.color = "#e67e22";
+
+            try {
+                // 2. Call your Flask Python backend
+                const response = await fetch('/attendance/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ class_id: "CSE_A", team: "Team2" })
+                });
+
+                const data = await response.json();
+
+                // 3. Display the results
+                if (response.ok) {
+                    status.innerText = "✅ AI Cycle Complete!";
+                    status.style.color = "#27ae60";
+                    output.innerText = JSON.stringify(data, null, 4);
+                } else {
+                    status.innerText = "❌ Error running AI.";
+                    status.style.color = "#c0392b";
+                    output.innerText = JSON.stringify(data, null, 4);
+                }
+            } catch (error) {
+                status.innerText = "❌ Server error.";
+                status.style.color = "#c0392b";
+                console.error(error);
+            } finally {
+                // 4. Re-enable the button
+                btn.disabled = false;
+            }
+        }
+    </script>
+
+</body>
+</html>

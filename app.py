@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template # <-- Added render_template
 import config
 from capture_camera.attendance_cycle import run_attendance_cycle
 
@@ -10,6 +10,13 @@ app = Flask(__name__)
 os.makedirs(config.CAPTURE_DIR, exist_ok=True)
 os.makedirs(config.ENHANCED_DIR, exist_ok=True)
 os.makedirs(os.path.dirname(config.ATTENDANCE_OUTPUT), exist_ok=True)
+
+# --- ADDED THIS NEW ROUTE ---
+@app.route('/')
+def home():
+    """Serves the main dashboard HTML page."""
+    return render_template('index.html')
+# ----------------------------
 
 @app.route('/attendance', methods=['GET'])
 def get_attendance():
@@ -46,5 +53,5 @@ def health_check():
     return jsonify({"status": "ok"}), 200
 
 if __name__ == "__main__":
-    # Run the app locally on port 5000
-    app.run(debug=True, port=5000)
+    # Run the app locally on port 5000, but turn off the auto-reloader!
+    app.run(debug=True, use_reloader=False, port=5000)

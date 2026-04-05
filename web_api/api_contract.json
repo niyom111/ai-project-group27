@@ -1,0 +1,14 @@
+{
+  "name": "AI Attendance API Contract",
+  "version": "1.0",
+  "description": "Defines the JSON structure for pushing attendance data to an external web service or dashboard.",
+  "payload_example": {
+    "date": "18-03-2026",
+    "class_id": "CSE_A",
+    "team": "Team2",
+    "attendance": [
+      "ST001",
+      "ST002"
+    ]
+  }
+}
