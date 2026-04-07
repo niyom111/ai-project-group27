@@ -1,0 +1,1 @@
+from .identify import process_image_for_attendance

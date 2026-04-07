@@ -8,10 +8,10 @@ from capture_camera.camera import get_capture, save_frame
 # Person 1's work (This matches your screenshot perfectly)
 from enhancement import enhance_image 
 
-# Person 2's work (Updated to match your 'recognition' folder)
+# Person 2's work (Updated to match your 'face_recognition' folder)
 # NOTE: Make sure Person 2 actually names their function 'process_image_for_attendance'
 try:
-    from recognition import process_image_for_attendance 
+    from face_recognition import process_image_for_attendance 
 except ImportError:
     # Fallback mock just in case Person 2 hasn't pushed their code yet
     print("Warning: Could not import Person 2's code. Using mock data.")
@@ -30,6 +30,9 @@ def run_attendance_cycle(class_id, team):
 
     # 2. Call Person 1's enhancement pipeline
     enhanced_path = enhance_image(raw_path)
+    if not enhanced_path:
+        print("Warning: Enhancement pipeline failed. Falling back to raw capture.")
+        enhanced_path = raw_path
 
     # 3. Call Person 2's recognition core
     student_ids = process_image_for_attendance(enhanced_path)

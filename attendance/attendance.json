@@ -1,8 +1,15 @@
 {
-  "date": "05-04-2026",
+  "date": "07-04-2026",
   "class_id": "CSE_A",
-  "team": "Team2",
+  "team": "Team_All",
   "attendance": [
-    "ST001"
+    "S3",
+    "S7",
+    "S10",
+    "S9",
+    "S4",
+    "S12",
+    "S8",
+    "S6"
   ]
 }
