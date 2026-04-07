@@ -6,5 +6,5 @@ pandas
 flask
 requests
 scikit-image
-
-
+Pillow
+scipy
