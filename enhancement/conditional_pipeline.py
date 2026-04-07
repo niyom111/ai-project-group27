@@ -83,15 +83,13 @@ def enhance_dark_zone(
     l_ch, a_ch, b_ch = split_lab_channels(result, use_cache=False)
     l_stretched = histogram_stretching(l_ch)
     l_clahe = apply_zone_clahe(l_stretched, "dark")
-    l_eq = blended_histogram_equalization(l_clahe, 0.85, 0.15)
+    l_eq = blended_histogram_equalization(l_clahe, 0.70, 0.30)
     merged = merge_lab_channels(l_eq, a_ch, b_ch)
     result = lab_to_bgr(merged)
 
     result = apply_zone_gamma(result, "dark", stats.mean_brightness)
 
     result = smart_sharpen(result, "dark", stats.noise_estimate)
-
-    result = apply_bilateral_smooth(result, d=5, sigma_color=30, sigma_space=30)
 
     return result
 
@@ -125,7 +123,7 @@ def enhance_shadow_zone(
     result = apply_zone_gamma(result, "shadow", stats.mean_brightness)
 
     result = full_edge_preserving_pipeline(
-        result, use_guided=False, use_bilateral=True, blend_strength=0.4
+        result, use_guided=False, use_bilateral=True, blend_strength=0.25
     )
 
     result = smart_sharpen(result, "shadow", stats.noise_estimate)

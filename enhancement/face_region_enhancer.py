@@ -52,7 +52,7 @@ def load_face_detector():
     """
     try:
         from mtcnn import MTCNN
-        detector = MTCNN(min_face_size=ecfg.FACE_DETECTION_MIN_SIZE[0])
+        detector = MTCNN()
         return detector
     except ImportError:
         print("Warning: MTCNN not installed. Face enhancement will be skipped.")

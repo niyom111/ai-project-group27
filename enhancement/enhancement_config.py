@@ -67,10 +67,10 @@ CLAHE_TILE_GRID_SIZE_LARGE = (16, 16)
 
 CLAHE_SETTINGS = {
     "dark": {
-        "clip_limit": 4.0,
+        "clip_limit": 2.5,
         "tile_grid_size": CLAHE_TILE_GRID_SIZE,
         "iterations": 2,
-        "blend_weight": 0.85,
+        "blend_weight": 0.70,
     },
     "shadow": {
         "clip_limit": 2.5,
@@ -102,8 +102,8 @@ CLAHE_SETTINGS = {
 # Gamma Correction Settings Per Zone Category
 # ---------------------------------------------------------------------------
 GAMMA_SETTINGS = {
-    "dark": {"gamma": 0.6, "adaptive": True, "min_gamma": 0.4, "max_gamma": 0.8},
-    "shadow": {"gamma": 0.8, "adaptive": True, "min_gamma": 0.6, "max_gamma": 0.9},
+    "dark": {"gamma": 0.75, "adaptive": True, "min_gamma": 0.6, "max_gamma": 0.85},
+    "shadow": {"gamma": 0.85, "adaptive": True, "min_gamma": 0.7, "max_gamma": 0.9},
     "normal": {"gamma": 0.95, "adaptive": False, "min_gamma": 0.9, "max_gamma": 1.0},
     "bright": {"gamma": 1.2, "adaptive": True, "min_gamma": 1.1, "max_gamma": 1.4},
     "overexposed": {"gamma": 1.5, "adaptive": True, "min_gamma": 1.3, "max_gamma": 1.8},
@@ -117,16 +117,16 @@ GAMMA_LOOKUP_TABLE_SIZE = 256
 NOISE_REDUCTION_SETTINGS = {
     "dark": {
         "method": "nlm",
-        "h_luminance": 12,
-        "h_color": 12,
+        "h_luminance": 6,
+        "h_color": 6,
         "template_window": 7,
         "search_window": 21,
         "bilateral_d": 9,
         "bilateral_sigma_color": 75,
         "bilateral_sigma_space": 75,
         "median_ksize": 5,
-        "apply_bilateral_pre": True,
-        "apply_median_post": True,
+        "apply_bilateral_pre": False,
+        "apply_median_post": False,
     },
     "shadow": {
         "method": "bilateral",
@@ -240,9 +240,9 @@ SHADOW_DILATION_KERNEL_SIZE = 5
 SHADOW_DILATION_ITERATIONS = 2
 
 SHADOW_ILLUMINATION_BLUR_KSIZE = 51
-SHADOW_COMPENSATION_STRENGTH = 0.8
-SHADOW_COMPENSATION_BLEND = 0.7
-SHADOW_REMOVAL_GAMMA = 0.85
+SHADOW_COMPENSATION_STRENGTH = 0.5
+SHADOW_COMPENSATION_BLEND = 0.5
+SHADOW_REMOVAL_GAMMA = 0.9
 
 # ---------------------------------------------------------------------------
 # White Balance
@@ -283,15 +283,15 @@ TONE_MAP_DRAGO_SATURATION = 1.0
 TONE_MAP_DRAGO_BIAS = 0.85
 TONE_MAP_DRAGO_GAMMA = 1.0
 
-TONE_MAP_BLEND_STRENGTH = 0.3
+TONE_MAP_BLEND_STRENGTH = 0.2
 
 # ---------------------------------------------------------------------------
 # Brightness Normalization
 # ---------------------------------------------------------------------------
 BRIGHTNESS_TARGET_MEAN = 130.0
 BRIGHTNESS_TARGET_STD = 40.0
-BRIGHTNESS_ADJUSTMENT_STRENGTH = 0.7
-BRIGHTNESS_MAX_SHIFT = 50
+BRIGHTNESS_ADJUSTMENT_STRENGTH = 0.4
+BRIGHTNESS_MAX_SHIFT = 30
 BRIGHTNESS_PRESERVE_HIGHLIGHTS = True
 BRIGHTNESS_HIGHLIGHT_THRESHOLD = 240
 BRIGHTNESS_PRESERVE_SHADOWS = True

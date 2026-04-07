@@ -74,7 +74,7 @@ def validate_image_path(image_path: str) -> bool:
 
 
 def validate_image_dimensions(image: np.ndarray) -> bool:
-    """Check that the loaded image has valid dimensions."""
+    """Check that the loaded image has valid dimensions (min only; oversized images are auto-resized)."""
     if image is None:
         return False
     if len(image.shape) < 2:
@@ -82,9 +82,19 @@ def validate_image_dimensions(image: np.ndarray) -> bool:
     height, width = image.shape[:2]
     if width < ecfg.MIN_IMAGE_WIDTH or height < ecfg.MIN_IMAGE_HEIGHT:
         return False
-    if width > ecfg.MAX_IMAGE_WIDTH or height > ecfg.MAX_IMAGE_HEIGHT:
-        return False
     return True
+
+
+def downscale_if_oversized(image: np.ndarray) -> np.ndarray:
+    """Proportionally downscale an image if it exceeds MAX dimensions, no padding."""
+    height, width = image.shape[:2]
+    if width <= ecfg.MAX_IMAGE_WIDTH and height <= ecfg.MAX_IMAGE_HEIGHT:
+        return image
+
+    scale = min(ecfg.MAX_IMAGE_WIDTH / width, ecfg.MAX_IMAGE_HEIGHT / height)
+    new_w = int(width * scale)
+    new_h = int(height * scale)
+    return cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
 
 
 def load_raw_image(image_path: str) -> Optional[np.ndarray]:
@@ -232,8 +242,8 @@ def load_and_prepare_image(
         metadata.resized_width = prepared.shape[1]
         metadata.resized_height = prepared.shape[0]
     else:
-        prepared = raw_image.copy()
-        metadata.resized_width = metadata.original_width
-        metadata.resized_height = metadata.original_height
+        prepared = downscale_if_oversized(raw_image)
+        metadata.resized_width = prepared.shape[1]
+        metadata.resized_height = prepared.shape[0]
 
     return prepared, metadata
